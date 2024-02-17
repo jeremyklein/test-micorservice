@@ -1,0 +1,31 @@
+name: Generate API Boilerplate
+
+on:
+  push:
+    paths:
+      - 'api.yaml' # Trigger the workflow on changes to your OAS file
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.16' # Specify the Go version
+
+      - name: Install oapi-codegen
+        run: go get github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
+
+      - name: Generate Gin server code
+        run: |
+          oapi-codegen -package main -generate "types,server,spec" api.yaml > api.gen.go
+          # Additional commands to adapt the generated code for Gin if necessary
+
+      - name: Commit and push generated code
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'Generate API boilerplate code'
